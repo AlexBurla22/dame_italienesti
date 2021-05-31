@@ -168,27 +168,36 @@ namespace dame_italienesti
                     {
                         if (piesa.GetLinie() > 0 && piesa.GetColoana() > 0 && piesa.GetColoana() < 7)
                         {
-                            if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() - 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() - 1, piesa.GetColoana() - 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
-                            if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.gol)
+
+                            i = piesa.GetLinie() - 1;
+                            j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() - 1, piesa.GetColoana() + 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                         else if (piesa.GetColoana() == 7)
                         {
-                            if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() - 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() - 1, piesa.GetColoana() - 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                         else if (piesa.GetColoana() == 0)
                         {
-                            if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() - 1;
+                            int j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() - 1, piesa.GetColoana() + 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                     }
@@ -196,32 +205,86 @@ namespace dame_italienesti
                     {
                         if (piesa.GetLinie() < 7 && piesa.GetColoana() > 0 && piesa.GetColoana() < 7)
                         {
-                            if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() + 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() + 1, piesa.GetColoana() - 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
-                            if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.gol)
+
+                            i = piesa.GetLinie() + 1;
+                            j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() + 1, piesa.GetColoana() + 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                         else if (piesa.GetColoana() == 7)
                         {
-                            if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() + 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() + 1, piesa.GetColoana() - 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                         else if (piesa.GetColoana() == 0)
                         {
-                            if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.gol)
+                            int i = piesa.GetLinie() + 1;
+                            int j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
                             {
-                                possibleMoves.Add(Tuple.Create(piesa.GetLinie() + 1, piesa.GetColoana() + 1));
+                                possibleMoves.Add(Tuple.Create(i, j));
                             }
                         }
                     }
                 }
-            } 
+                else if (piesa.GetTipPiesa() == TipPiesa.king)
+                {
+                    if (piesa.GetLinie() < 7)
+                    {
+                        if (piesa.GetColoana() > 0)
+                        {
+                            int i = piesa.GetLinie() + 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
+                            {
+                                possibleMoves.Add(Tuple.Create(i, j));
+                            }
+                        }
+                        if (piesa.GetColoana() < 7)
+                        {
+                            int i = piesa.GetLinie() + 1;
+                            int j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
+                            {
+                                possibleMoves.Add(Tuple.Create(i, j));
+                            }
+                        }
+                    }
+                    if(piesa.GetLinie() > 0)
+                    {
+                        if (piesa.GetColoana() > 0)
+                        {
+                            int i = piesa.GetLinie() - 1;
+                            int j = piesa.GetColoana() - 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
+                            {
+                                possibleMoves.Add(Tuple.Create(i, j));
+                            }
+                        }
+                        if (piesa.GetColoana() < 7)
+                        {
+                            int i = piesa.GetLinie() - 1;
+                            int j = piesa.GetColoana() + 1;
+                            if (tabla[i, j].GetCuloare() == Culoare.gol)
+                            {
+                                possibleMoves.Add(Tuple.Create(i, j));
+                            }
+                        }
+                    }
+                }
+            }
             piesa.SetPossbileMoves(possibleMoves);
         }
     }
