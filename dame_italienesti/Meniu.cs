@@ -15,6 +15,7 @@ namespace dame_italienesti
         public Meniu()
         {
             InitializeComponent();
+            CenterToScreen();
         }
 
         private void button1_Click(object sender, EventArgs e)

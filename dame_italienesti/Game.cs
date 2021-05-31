@@ -130,7 +130,22 @@ namespace dame_italienesti
 
             tabla[newPosition.Item1, newPosition.Item2].SetPosition(newPosition);
             tabla[oldPosition.Item1, oldPosition.Item2].SetPosition(oldPosition);
+
+            TryPromote(tabla[newPosition.Item1, newPosition.Item2]);
         }
+
+        private void TryPromote(Piesa piesa)
+        {
+            if (piesa.GetTipPiesa() == TipPiesa.man)
+            {
+                if (piesa.GetPosition().Item1 == 0 && piesa.GetCuloare() == Culoare.alb ||
+                    piesa.GetPosition().Item1 == 7 && piesa.GetCuloare() == Culoare.negru)
+                {
+                    piesa.SetTipPiesa(TipPiesa.king);
+                }
+            } 
+        }
+
         private bool ValidMove(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
         {
             return tabla[oldPosition.Item1, oldPosition.Item2].GetPossibleMoves().Contains(newPosition);

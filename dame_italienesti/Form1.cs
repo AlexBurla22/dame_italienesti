@@ -22,6 +22,7 @@ namespace dame_italienesti
             InitializeComponent();
             jocNou = new Game();
             pictureBoxes = new PictureBox[8, 8];
+            CenterToScreen();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -93,7 +94,7 @@ namespace dame_italienesti
                     afisare_randJoc(jocNou.GetRandJoc());
                     afisare_numar_piese(jocNou.GetNumarPieseAlb(), jocNou.GetNumarPieseNegre());
                 }
-                //MessageBox.Show("Sursa: Line " + source.Item1 + " Coloana " + source.Item2 + "\nDestinatie: Line " + destination.Item1 + " Coloana " + destination.Item2);
+               // MessageBox.Show("Sursa: Line " + source.Item1 + " Coloana " + source.Item2 + "\nDestinatie: Line " + destination.Item1 + " Coloana " + destination.Item2);
                 pictureBoxes[source.Item1, source.Item2].BorderStyle = BorderStyle.None;
                 clicked = false;
             }
@@ -120,7 +121,7 @@ namespace dame_italienesti
                 }
                 else if (piece.GetTipPiesa() == TipPiesa.king)
                 {
-
+                    picture.Image = Properties.Resources.checkers_black_dama;
                 }
             }
 
@@ -132,7 +133,7 @@ namespace dame_italienesti
                 }
                 else if(piece.GetTipPiesa() == TipPiesa.king)
                 {
-
+                    picture.Image = Properties.Resources.checkers_white_dama;
                 }
             }
 
