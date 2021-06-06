@@ -13,6 +13,8 @@ namespace dame_italienesti
         Piesa[,] tabla;
         Culoare randJoc;
         const int dimensiuneJoc = 8;
+        bool gameEnded = false;
+
         public Game()
         {
             randJoc = Culoare.alb;
@@ -20,6 +22,10 @@ namespace dame_italienesti
             playerNegru = new Player(Culoare.negru, 12);
             tabla = new Piesa[dimensiuneJoc, dimensiuneJoc];
             InitializareTablaJoc();
+        }
+        public bool CheckGameEnded()
+        {
+            return gameEnded;
         }
         public int GetNumarPieseAlb()
         {
@@ -101,6 +107,10 @@ namespace dame_italienesti
                     }    
                 }
             }
+
+            CalculateAttackMovesForPlayer(playerAlb);
+            CalculateAttackMovesForPlayer(playerNegru);
+
             CalculatePossibleMovesForPlayer(playerAlb);
             CalculatePossibleMovesForPlayer(playerNegru);
         }
@@ -110,15 +120,132 @@ namespace dame_italienesti
         }
         public bool TryMakeMove(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
         {
-            if (ValidMove(oldPosition, newPosition))
+            if (MustAttack(randJoc))
+            {
+                if (ValidAttackMove(oldPosition, newPosition))
+                {
+                    MoveAndTakePiece(oldPosition, newPosition);
+                    if (!GameHasEnded())
+                    {
+                        SchimbaRandJoc();
+
+                        CalculateAttackMovesForPlayer(playerAlb);
+                        CalculateAttackMovesForPlayer(playerNegru);
+
+                        CalculatePossibleMovesForPlayer(playerAlb);
+                        CalculatePossibleMovesForPlayer(playerNegru);
+                    }
+                    return true;
+                }
+            }
+            else if(ValidMove(oldPosition, newPosition))
             {
                 MovePieceToEmptySpace(oldPosition, newPosition);
-                SchimbaRandJoc();
+                if (!GameHasEnded())
+                {   
+                    SchimbaRandJoc();
 
-                CalculatePossibleMovesForPlayer(playerAlb);
-                CalculatePossibleMovesForPlayer(playerNegru);
+                    CalculateAttackMovesForPlayer(playerAlb);
+                    CalculateAttackMovesForPlayer(playerNegru);
 
+                    CalculatePossibleMovesForPlayer(playerAlb);
+                    CalculatePossibleMovesForPlayer(playerNegru);
+                }
                 return true;
+            }
+            return false;
+        }
+        private bool GameHasEnded()
+        {
+            if (playerAlb.GetPiese().Count == 0)
+            {
+                gameEnded = true;
+                return true;
+            }
+            if (playerNegru.GetPiese().Count == 0)
+            {
+                gameEnded = true;
+                return true;
+            }
+            return false;
+        }
+        private void MoveAndTakePiece(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
+        {
+            Piesa temporar = tabla[newPosition.Item1, newPosition.Item2];
+            tabla[newPosition.Item1, newPosition.Item2] = tabla[oldPosition.Item1, oldPosition.Item2];
+            tabla[oldPosition.Item1, oldPosition.Item2] = temporar;
+
+            tabla[newPosition.Item1, newPosition.Item2].SetPosition(newPosition);
+            tabla[oldPosition.Item1, oldPosition.Item2].SetPosition(oldPosition);
+
+            Tuple<int, int> middlePosition = CalculateMiddlePosition(oldPosition, newPosition);
+            RemovePiece(middlePosition);
+
+            TryPromote(tabla[newPosition.Item1, newPosition.Item2]);
+        }
+        private void RemovePiece(Tuple<int, int> middlePosition)
+        {
+            Piesa deSters = tabla[middlePosition.Item1, middlePosition.Item2];
+            if (deSters.GetCuloare() == Culoare.negru)
+            {
+                playerNegru.GetPiese().Remove(deSters);
+            }
+            else
+            {
+                playerAlb.GetPiese().Remove(deSters);
+            }
+            tabla[middlePosition.Item1, middlePosition.Item2] = new Piesa();
+        }
+        private Tuple<int, int> CalculateMiddlePosition(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
+        {
+            if ((oldPosition.Item1 - newPosition.Item1) > 0) //mai sus
+            {
+                if ((oldPosition.Item2 - newPosition.Item2) > 0) //stanga
+                {
+                    return Tuple.Create(oldPosition.Item1 - 1, oldPosition.Item2 - 1);
+                }
+                else //dreapta
+                {
+                    return Tuple.Create(oldPosition.Item1 - 1, oldPosition.Item2 + 1);
+                }
+            }
+            else //mai jos
+            {
+                if ((oldPosition.Item2 - newPosition.Item2) > 0) //stanga
+                {
+                    return Tuple.Create(oldPosition.Item1 + 1, oldPosition.Item2 - 1);
+                }
+                else //dreapta
+                {
+                    return Tuple.Create(oldPosition.Item1 + 1, oldPosition.Item2 + 1);
+                }
+            }
+        }
+        private bool ValidAttackMove(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
+        {
+            return tabla[oldPosition.Item1, oldPosition.Item2].GetAttackMoves().Contains(newPosition);
+        }
+        private bool MustAttack(Culoare randJoc)
+        {
+            if (randJoc == Culoare.alb)
+            {
+                foreach (Piesa piesa in playerAlb.GetPiese())
+                {
+                    if (piesa.GetAttackMoves().Count > 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (randJoc == Culoare.negru)
+            {
+                foreach (Piesa piesa in playerNegru.GetPiese())
+                {
+                    if (piesa.GetAttackMoves().Count > 0)
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -133,7 +260,6 @@ namespace dame_italienesti
 
             TryPromote(tabla[newPosition.Item1, newPosition.Item2]);
         }
-
         private void TryPromote(Piesa piesa)
         {
             if (piesa.GetTipPiesa() == TipPiesa.man)
@@ -145,7 +271,6 @@ namespace dame_italienesti
                 }
             } 
         }
-
         private bool ValidMove(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
         {
             return tabla[oldPosition.Item1, oldPosition.Item2].GetPossibleMoves().Contains(newPosition);
@@ -156,6 +281,205 @@ namespace dame_italienesti
             {
                 CalculatePossibleMoves(piesa);
             }
+        }
+        private void CalculateAttackMovesForPlayer(Player player)
+        {
+            foreach (Piesa piesa in player.GetPiese())
+            {
+                CalculateAttackMoves(piesa);
+            }
+        }
+        private void CalculateAttackMoves(Piesa piesa)
+        {
+            List<Tuple<int, int>> captures = new List<Tuple<int, int>>();
+            if (piesa.GetCuloare() == randJoc)
+            {
+                if (piesa.GetTipPiesa() == TipPiesa.man)
+                {
+                    if (piesa.GetCuloare() == Culoare.alb)
+                    {
+                        if (piesa.GetLinie() > 1)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.negru && 
+                                    tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetTipPiesa() == TipPiesa.man)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.negru &&
+                                    tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetTipPiesa() == TipPiesa.man)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if(piesa.GetCuloare() == Culoare.negru)
+                    {
+                        if (piesa.GetLinie() < 6)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.alb &&
+                                    tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetTipPiesa() == TipPiesa.man)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.alb &&
+                                    tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetTipPiesa() == TipPiesa.man)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (piesa.GetTipPiesa() == TipPiesa.king)
+                {
+                    if (piesa.GetCuloare() == Culoare.alb)
+                    {
+                        if (piesa.GetLinie() > 1)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.negru)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.negru)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                        if (piesa.GetLinie() < 6)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.negru)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.negru)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (piesa.GetCuloare() == Culoare.negru)
+                    {
+                        if (piesa.GetLinie() > 1)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.alb)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() - 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.alb)
+                                {
+                                    int i = piesa.GetLinie() - 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                        if (piesa.GetLinie() < 6)
+                        {
+                            if (piesa.GetColoana() > 1)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() - 1].GetCuloare() == Culoare.alb)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() - 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                            if (piesa.GetColoana() < 6)
+                            {
+                                if (tabla[piesa.GetLinie() + 1, piesa.GetColoana() + 1].GetCuloare() == Culoare.alb)
+                                {
+                                    int i = piesa.GetLinie() + 2;
+                                    int j = piesa.GetColoana() + 2;
+                                    if (tabla[i, j].GetCuloare() == Culoare.gol)
+                                    {
+                                        captures.Add(Tuple.Create(i, j));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            piesa.SetAttackMoves(captures);
         }
         private void CalculatePossibleMoves(Piesa piesa)
         {

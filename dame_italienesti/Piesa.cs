@@ -12,12 +12,14 @@ namespace dame_italienesti
         TipPiesa tip;
         Tuple<int, int> position;
         List<Tuple<int, int>> posibleMoves;
+        List<Tuple<int, int>> attackMoves;
         public Piesa()
         {
             culoare = Culoare.gol;
             tip = TipPiesa.gol;
             position = Tuple.Create(0, 0);
             posibleMoves = new List<Tuple<int, int>>();
+            attackMoves = new List<Tuple<int, int>>();
         }
         public Piesa(Culoare culoare, TipPiesa tip)
         {
@@ -64,6 +66,14 @@ namespace dame_italienesti
         public void SetTipPiesa(TipPiesa tipNou)
         {
             tip = tipNou;
+        }
+        public List<Tuple<int, int>> GetAttackMoves()
+        {
+            return attackMoves;
+        }
+        public void SetAttackMoves(List<Tuple<int, int>> moves)
+        {
+            attackMoves = moves;
         }
     }
 }
