@@ -107,7 +107,7 @@ namespace dame_italienesti
                         afisare_tabla(jocNou.GetTablaJoc(), pictureBoxes);
                         afisare_randJoc(jocNou.GetRandJoc());
                         afisare_numar_piese(jocNou.GetNumarPieseAlb(), jocNou.GetNumarPieseNegre());
-                    }   
+                    }
                 }
                // MessageBox.Show("Sursa: Line " + source.Item1 + " Coloana " + source.Item2 + "\nDestinatie: Line " + destination.Item1 + " Coloana " + destination.Item2);
                 pictureBoxes[source.Item1, source.Item2].BorderStyle = BorderStyle.None;

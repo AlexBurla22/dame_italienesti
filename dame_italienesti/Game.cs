@@ -14,7 +14,7 @@ namespace dame_italienesti
         Culoare randJoc;
         const int dimensiuneJoc = 8;
         bool gameEnded = false;
-
+        int piecesTaken = 0;
         public Game()
         {
             randJoc = Culoare.alb;
@@ -53,6 +53,7 @@ namespace dame_italienesti
             {
                 randJoc = Culoare.alb;
             }
+            piecesTaken = 0;
         }
         private void InitializareTablaJoc()
         {
@@ -127,13 +128,20 @@ namespace dame_italienesti
                     MoveAndTakePiece(oldPosition, newPosition);
                     if (!GameHasEnded())
                     {
-                        SchimbaRandJoc();
+                        if (PieceCanStillCapture(newPosition))
+                        {
+                            ContinueAttack(newPosition);
+                        }
+                        else
+                        {
+                            SchimbaRandJoc();
 
-                        CalculateAttackMovesForPlayer(playerAlb);
-                        CalculateAttackMovesForPlayer(playerNegru);
+                            CalculateAttackMovesForPlayer(playerAlb);
+                            CalculateAttackMovesForPlayer(playerNegru);
 
-                        CalculatePossibleMovesForPlayer(playerAlb);
-                        CalculatePossibleMovesForPlayer(playerNegru);
+                            CalculatePossibleMovesForPlayer(playerAlb);
+                            CalculatePossibleMovesForPlayer(playerNegru);
+                        }
                     }
                     return true;
                 }
@@ -142,7 +150,7 @@ namespace dame_italienesti
             {
                 MovePieceToEmptySpace(oldPosition, newPosition);
                 if (!GameHasEnded())
-                {   
+                {
                     SchimbaRandJoc();
 
                     CalculateAttackMovesForPlayer(playerAlb);
@@ -152,6 +160,39 @@ namespace dame_italienesti
                     CalculatePossibleMovesForPlayer(playerNegru);
                 }
                 return true;
+            }
+            return false;
+        }
+        private void ContinueAttack(Tuple<int, int> newPosition)
+        {
+            Piesa careAtaca = tabla[newPosition.Item1, newPosition.Item2];
+            foreach (Piesa piesa in playerAlb.GetPiese())
+            {
+                if (!piesa.Equals(careAtaca))
+                {
+                    piesa.SetAttackMoves(new List<Tuple<int, int>>());
+                    piesa.SetPossbileMoves(new List<Tuple<int, int>>());
+                }
+            }
+            foreach (Piesa piesa in playerNegru.GetPiese())
+            {
+                if (!piesa.Equals(careAtaca))
+                {
+                    piesa.SetAttackMoves(new List<Tuple<int, int>>());
+                    piesa.SetPossbileMoves(new List<Tuple<int, int>>());
+                }
+            }
+        }
+        private bool PieceCanStillCapture(Tuple<int, int> newPosition)
+        {
+            if (piecesTaken < 3)
+            {
+                Piesa deVerif = tabla[newPosition.Item1, newPosition.Item2];
+                CalculateAttackMoves(deVerif);
+                if (deVerif.GetAttackMoves().Count > 0)
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -180,7 +221,7 @@ namespace dame_italienesti
 
             Tuple<int, int> middlePosition = CalculateMiddlePosition(oldPosition, newPosition);
             RemovePiece(middlePosition);
-
+            piecesTaken++;
             TryPromote(tabla[newPosition.Item1, newPosition.Item2]);
         }
         private void RemovePiece(Tuple<int, int> middlePosition)
