@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -71,7 +72,7 @@ namespace dame_italienesti
                 randPictureBox.Image = Properties.Resources.checkers_black;
             }
         }
-        private void clickOnPictureBox(object sender, MouseEventArgs e)
+        private async void clickOnPictureBox(object sender, MouseEventArgs e)
         {
             PictureBox pbClicked = (sender as PictureBox);
 
@@ -107,6 +108,35 @@ namespace dame_italienesti
                         afisare_tabla(jocNou.GetTablaJoc(), pictureBoxes);
                         afisare_randJoc(jocNou.GetRandJoc());
                         afisare_numar_piese(jocNou.GetNumarPieseAlb(), jocNou.GetNumarPieseNegre());
+
+                        pictureBoxes[source.Item1, source.Item2].BorderStyle = BorderStyle.None;
+                        clicked = false;
+
+                        await Task.Delay(1000);
+
+                        while (jocNou.GetRandJoc() == Culoare.negru && !jocNou.CheckGameEnded())
+                        {
+                            jocNou.TryMakeMovePC();
+
+                            if (jocNou.CheckGameEnded())
+                            {
+                                if (jocNou.GetRandJoc() == Culoare.alb)
+                                {
+                                    MessageBox.Show("Alb a castigat!");
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Negru a castigat!");
+                                }
+                                Close();
+                            }
+                            else
+                            {
+                                afisare_tabla(jocNou.GetTablaJoc(), pictureBoxes);
+                                afisare_randJoc(jocNou.GetRandJoc());
+                                afisare_numar_piese(jocNou.GetNumarPieseAlb(), jocNou.GetNumarPieseNegre());
+                            }
+                        }
                     }
                 }
                // MessageBox.Show("Sursa: Line " + source.Item1 + " Coloana " + source.Item2 + "\nDestinatie: Line " + destination.Item1 + " Coloana " + destination.Item2);

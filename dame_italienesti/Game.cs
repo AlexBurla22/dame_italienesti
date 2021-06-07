@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace dame_italienesti
 {
@@ -119,6 +116,75 @@ namespace dame_italienesti
         {
             return tabla;
         }
+
+        public void TryMakeMovePC()
+        {
+            Random random = new Random();
+            if (MustAttack(randJoc))
+            {
+                List<Piesa> pieseCarePotAtaca = new List<Piesa>();
+                foreach (Piesa piese in playerNegru.GetPiese())
+                {
+                    if (piese.GetAttackMoves().Count > 0)
+                    {
+                        pieseCarePotAtaca.Add(piese);
+                    }
+                }
+
+                Piesa aleasa = pieseCarePotAtaca[random.Next(pieseCarePotAtaca.Count)];
+
+                Tuple<int, int> oldPosition = aleasa.GetPosition();
+                Tuple<int, int> newPosition = aleasa.GetAttackMoves()[random.Next(aleasa.GetAttackMoves().Count)];
+
+                MoveAndTakePiece(oldPosition, newPosition);
+                if (!GameHasEnded())
+                {
+                    if (PieceCanStillCapture(newPosition))
+                    {
+                        ContinueAttack(newPosition);
+                    }
+                    else
+                    {
+                        SchimbaRandJoc();
+
+                        CalculateAttackMovesForPlayer(playerAlb);
+                        CalculateAttackMovesForPlayer(playerNegru);
+
+                        CalculatePossibleMovesForPlayer(playerAlb);
+                        CalculatePossibleMovesForPlayer(playerNegru);
+                    }
+                }
+            }
+            else //mutare
+            {
+                List<Piesa> pieseCarePotMuta = new List<Piesa>();
+                foreach (Piesa piese in playerNegru.GetPiese())
+                {
+                    if (piese.GetPossibleMoves().Count > 0)
+                    {
+                        pieseCarePotMuta.Add(piese);
+                    }
+                }
+
+                Piesa aleasa = pieseCarePotMuta[random.Next(pieseCarePotMuta.Count)];
+
+                Tuple<int, int> oldPosition = aleasa.GetPosition();
+                Tuple<int, int> newPosition = aleasa.GetPossibleMoves()[random.Next(aleasa.GetPossibleMoves().Count)];
+
+                MovePieceToEmptySpace(oldPosition, newPosition);
+                if (!GameHasEnded())
+                {
+                    SchimbaRandJoc();
+
+                    CalculateAttackMovesForPlayer(playerAlb);
+                    CalculateAttackMovesForPlayer(playerNegru);
+
+                    CalculatePossibleMovesForPlayer(playerAlb);
+                    CalculatePossibleMovesForPlayer(playerNegru);
+                }
+            }
+        }
+
         public bool TryMakeMove(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
         {
             if (MustAttack(randJoc))
@@ -236,6 +302,7 @@ namespace dame_italienesti
                 playerAlb.GetPiese().Remove(deSters);
             }
             tabla[middlePosition.Item1, middlePosition.Item2] = new Piesa();
+            tabla[middlePosition.Item1, middlePosition.Item2].SetPosition(middlePosition);
         }
         private Tuple<int, int> CalculateMiddlePosition(Tuple<int, int> oldPosition, Tuple<int, int> newPosition)
         {
